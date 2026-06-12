@@ -76,10 +76,8 @@
 </head>
 <body>
     <div class="container" id="app">
-        <!-- ID заявки из URL / заглушка -->
         <div id="bid-id-display" style="text-align:center;padding:8px;font-size:0.85rem;color:var(--text-muted);"></div>
 
-        <!-- Состояния: loading, error, form, success -->
         <div id="loading" class="loader">
             <div class="spinner"></div>
             <p style="margin-top:12px;">Загрузка данных заявки...</p>
@@ -91,7 +89,6 @@
         </div>
 
         <div id="form-state" style="display:none;">
-            <!-- Детали заявки -->
             <div class="card">
                 <h1 id="bid-title">Заявка</h1>
                 <span class="badge badge-new" id="bid-status"></span>
@@ -103,12 +100,6 @@
                 <div class="detail-grid" id="bid-main-details"></div>
             </div>
 
-            <div class="card" id="cargo-card" style="display:none;">
-                <h2>📦 Информация о грузе</h2>
-                <div id="cargo-details"></div>
-            </div>
-
-            <!-- Форма предложения -->
             <div class="card">
                 <h2>📝 Данные перевозчика</h2>
                 <div class="input-group">
@@ -152,11 +143,9 @@
     </div>
 
     <script>
-        // --- Конфигурация ---
-        // Базовый URL API сервера. Для GitHub Pages замените на IP вашего сервера.
-const API_BASE = 'http://10.0.60.8:8000';
+        // --- Конфигурация (генерируется из .env) ---
+        const API_BASE = 'http://10.0.60.8:8000';
 
-        // Статьи затрат — фиксированный список
         const COST_ITEMS = [
             { item: 'Pre-carriage', currency: 'USD' },
             { item: 'OTHC', currency: 'USD' },
@@ -169,7 +158,6 @@ const API_BASE = 'http://10.0.60.8:8000';
 
         let currentBid = null;
 
-        // --- Утилиты ---
         function show(elId) { document.getElementById(elId).style.display = ''; }
         function hide(elId) { document.getElementById(elId).style.display = 'none'; }
 
@@ -193,7 +181,6 @@ const API_BASE = 'http://10.0.60.8:8000';
             return div.innerHTML.replace(/\n/g, '<br>');
         }
 
-        // --- Загрузка заявки ---
         async function loadBid() {
             const bidId = getBidIdFromUrl();
             document.getElementById('bid-id-display').textContent = bidId ? `ID заявки: ${bidId}` : '';
@@ -244,7 +231,6 @@ const API_BASE = 'http://10.0.60.8:8000';
             document.getElementById('bid-status').textContent = bid.status || 'Новая';
             document.getElementById('bid-date').textContent = `Создана: ${formatDate(bid.date_created)}`;
 
-            // Основные данные
             const d = bid.details || {};
             const mainGrid = document.getElementById('bid-main-details');
             const fields = [
@@ -271,7 +257,6 @@ const API_BASE = 'http://10.0.60.8:8000';
                 })
                 .join('');
 
-            // Таблица стоимости
             const tbody = document.getElementById('cost-table-body');
             tbody.innerHTML = COST_ITEMS.map((ci, idx) => `
                 <tr>
@@ -281,11 +266,9 @@ const API_BASE = 'http://10.0.60.8:8000';
                 </tr>
             `).join('');
 
-            // Сброс ошибки отправки
             document.getElementById('submit-error').style.display = 'none';
         }
 
-        // --- Отправка предложения ---
         async function submitOffer() {
             const carrierName = document.getElementById('carrier-name').value.trim();
             const carrierEmail = document.getElementById('carrier-email').value.trim();
@@ -295,7 +278,6 @@ const API_BASE = 'http://10.0.60.8:8000';
 
             submitError.style.display = 'none';
 
-            // Валидация
             if (!carrierName) {
                 submitError.textContent = 'Укажите название компании';
                 submitError.style.display = '';
@@ -307,7 +289,6 @@ const API_BASE = 'http://10.0.60.8:8000';
                 return;
             }
 
-            // Сбор стоимости
             const costs = [];
             COST_ITEMS.forEach((ci, idx) => {
                 const input = document.getElementById(`cost-${idx}`);
@@ -344,11 +325,7 @@ const API_BASE = 'http://10.0.60.8:8000';
                 if (!resp.ok) {
                     const body = await resp.json().catch(() => ({}));
                     const msg = body.detail || `Ошибка сервера (${resp.status})`;
-                    if (resp.status === 409) {
-                        submitError.textContent = msg;
-                    } else {
-                        submitError.textContent = msg;
-                    }
+                    submitError.textContent = msg;
                     submitError.style.display = '';
                     submitBtn.disabled = false;
                     submitBtn.textContent = '📤 Отправить предложение';
@@ -371,7 +348,6 @@ const API_BASE = 'http://10.0.60.8:8000';
             }
         }
 
-        // --- Старт ---
         loadBid();
     </script>
 </body>
